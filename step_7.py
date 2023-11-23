@@ -4,38 +4,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-from step_4 import corr
 from step_1 import raw_data
 
-# Perform k-means clustering for k = 5, 7
 
-
-def k_means_clustering(data, k):
-    kmeans = KMeans(n_clusters=k, random_state=0).fit(data)
-    return kmeans.labels_, kmeans.cluster_centers_
-
-
-# Plot the results of clustering
-def plot_clustering_results(data, labels, centers):
-    plt.figure(figsize=(25, 5))
-    plt.scatter(range(len(data)), data, c=labels)
-    plt.scatter(range(len(centers)), centers, c='red')
+def plot_clusters(data):
+    plt.figure(figsize=(18, 12))
+    for i, k in enumerate([5, 7]):
+        kmeans = KMeans(n_clusters=k, random_state=0).fit(raw_data)
+        labels, centers = kmeans.labels_, kmeans.cluster_centers_
+        plt.subplot(2, 1, i + 1)
+        plt.scatter(range(len(data)), data[:, 0], c=labels)
+        plt.scatter(range(len(centers)), centers[:, 0], c='red')
+        plt.title(f"K-means clustering for k = {k}")
+    plt.tight_layout()
     plt.show()
+    plt.close()
 
 
 if __name__ == "__main__":
-    all_channels = raw_data[:1000, :]
-    eig_vals, eig_vecs = np.linalg.eig(corr)
-    basic_components = np.dot(all_channels, eig_vecs[:, :3])
+    correlation_matrix = np.corrcoef(raw_data.T)
+    eig_vals, eig_vecs = np.linalg.eig(correlation_matrix)
+    basic_components = np.dot(raw_data, eig_vecs[:, :3])
 
     # A
-    labels, centers = k_means_clustering(all_channels, 5)
-    plot_clustering_results(all_channels[:, 0], labels, centers[:, 0])
-    labels, centers = k_means_clustering(all_channels, 7)
-    plot_clustering_results(all_channels[:, 0], labels, centers[:, 0])
+    plot_clusters(raw_data)
 
     # B
-    labels, centers = k_means_clustering(basic_components, 5)
-    plot_clustering_results(basic_components[:, 0], labels, centers[:, 0])
-    labels, centers = k_means_clustering(basic_components, 7)
-    plot_clustering_results(basic_components[:, 0], labels, centers[:, 0])
+    plot_clusters(basic_components)

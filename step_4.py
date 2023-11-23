@@ -1,38 +1,34 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.fft import fft, fftfreq
+
 from step_1 import raw_data
 
 
-def fourier_transform():
-    # Perform the Fourier transform using the formulas from the lecture.
-    # Calculate the amplitude spectrum and the phase spectrum.
+def frequency_analysis(data, analysis_type="fourier"):
+    plt.figure(figsize=(18, 12))
+    for i in range(data.shape[1]):
+        plt.subplot(4, 3, i + 1)
 
-    plt.figure(figsize=(20, 15))
-    for i in range(12):
-        plt.subplot(3, 4, i + 1)
-        fft_data = fft(raw_data[:, i])
-        frequency = fftfreq(len(raw_data[:, i]), 1 / 1000)[1]
-        print(f"Frequencies: {frequency}")
-        plt.plot(fft_data[:1000], color='red')
-        plt.title(f"Channel {i + 1}")
-    plt.show()
+        if analysis_type == "fourier":
+            spectrum = fft(data[:, i])
+            frequencies = fftfreq(len(data[:, i]), 1 / 1000)[1]
+            print(f"Detected Frequencies: {frequencies}")
 
+            plt.plot(spectrum[:1000], color='green')
+            plt.title(f"Channel {i + 1} - Fourier Transform")
 
-def inverse_fourier_transform():
-    # Perform the inverse Fourier transform using the formulas from the lecture.
-    # Compare the results with the original data.
+        elif analysis_type == "inverse_fourier":
+            spectrum = fft(data[:, i])
+            inverse_data = np.fft.ifft(spectrum)
 
-    plt.figure(figsize=(20, 15))
-    for i in range(12):
-        plt.subplot(3, 4, i + 1)
-        fft_data = fft(raw_data[:, i])
-        inverse_data = np.fft.ifft(fft_data)
-        plt.plot(inverse_data[:1000], color='red')
-        plt.title(f"Channel {i + 1}")
+            plt.plot(inverse_data[:1000], color='green')
+            plt.plot(data[:, i][:1000], color='red')
+            plt.title(f"Channel {i + 1} - Inverse Fourier Transform")
+    plt.tight_layout()
     plt.show()
 
 
 if __name__ == "__main__":
-    fourier_transform()
-    inverse_fourier_transform()
+    frequency_analysis(raw_data, analysis_type="fourier")
+    frequency_analysis(raw_data, analysis_type="inverse_fourier")
